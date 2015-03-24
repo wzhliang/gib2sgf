@@ -31,13 +31,42 @@ func handleGE(line string) string {
 	return ")"
 }
 
+func getMetaValue(line string) (v string) {
+	v = strings.Split(line, "=")[1]
+	v = strings.Trim(v, "\\]")
+
+	return
+}
+
+func handleWhiteName(line string) string {
+	return fmt.Sprintf("PW[%s]", getMetaValue(line))
+}
+
+func handleBlackName(line string) string {
+	return fmt.Sprintf("PB[%s]", getMetaValue(line))
+}
+
+func handleResult(line string) string {
+	m := map[string]string{
+		"black": "B",
+		"white": "W",
+	}
+	r := strings.Split(getMetaValue(line), " ")
+
+	return fmt.Sprintf("RE[%s+%s]", m[r[0]], r[1])
+	// XXX: need to support more format, like resign, etc
+}
+
 func HandleLine(line string) {
 	l := strings.Trim(line, " ")
 
 	handlers := map[string]Handler{
-		"\\HS": handleHS,
-		"STO":  handleSTO,
-		"\\GE": handleGE,
+		"\\HS":             handleHS,
+		"STO":              handleSTO,
+		"\\GE":             handleGE,
+		"\\[GAMEWHITENAME": handleWhiteName,
+		"\\[GAMEBLACKNAME": handleBlackName,
+		"\\[GAMERESULT":    handleResult,
 	}
 
 	for prefix, h := range handlers {
